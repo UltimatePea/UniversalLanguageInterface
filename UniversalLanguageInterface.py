@@ -1,6 +1,10 @@
 import argparse
 import json
 import os, tempfile, subprocess
+import logging, sys
+
+#logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 export_list = {}
 
@@ -29,13 +33,17 @@ def start_single_mode(input_pipe_name, output_pipe_name):
     result produced to output pipe
 
     """
-    line = open(input_pipe_name).readline()
-    info = json.loads(line)
-    name = info["name"]
-    args = info["args"]
-    if name not in export_list:
-        raise ValueError("Function {} does not exist".format(name))
-    return_val({"code":200, "return_val":export_list[name](*args)})
+    logging.debug("Starting Single Mode")
+    logging.debug("[Begin] Callee -- Opening Caller -> Callee Pipe ")
+    with open(input_pipe_name) as inp:
+        logging.debug("[Done] Callee -- Opening Caller -> Callee Pipe")
+        line = inp.readline()
+        info = json.loads(line)
+        name = info["name"]
+        args = info["args"]
+        if name not in export_list:
+            raise ValueError("Function {} does not exist".format(name))
+        return_val(output_pipe_name, {"code":200, "return_val":export_list[name](*args)})
     
 
     
@@ -44,7 +52,9 @@ def return_val(output_pipe_name, dic):
     """
     Open the output pipe and dump json represetation of dic as a line
     """
-    with open(output_pipe_name) as f:
+    logging.debug("[Begin] Callee -- Opening Callee -> Caller Pipe ")
+    with open(output_pipe_name, 'w') as f:
+        logging.debug("[Done] Callee -- Opening Callee -> Caller Pipe ")
         f.write(json.dumps(dic) + os.linesep)
 
 
@@ -91,8 +101,12 @@ def call(setting):
     os.mkfifo(outpipe) # TODO security hazard, handle OSError here
     os.mkfifo(inpipe)
     # write argument to `inp`, Open will block until the other end also opens, so need subprocess call
+    logging.debug("[Begin] Forking off Sub process")
     subpro = subprocess.Popen([setting.prog, setting.filename, "--mode", "single", "--input-pipe", outpipe, "--output-pip", inpipe])
+    logging.debug("[Done] Forking off Sub process")
+    logging.debug("[Begin] Caller -- Opening Caller -> Callee Pipe ")
     with open(outpipe, 'w') as o:
+        logging.debug("[Done] Caller -- Opening Caller -> Callee Pipe ")
         o.write(json.dumps({
             "name": setting.function_name,
             "args": setting.args
@@ -100,13 +114,17 @@ def call(setting):
     # call program in single mode
     
     # program should put one line to inpipe, we need to open pipe here in order to prevent the subprocess from blocking
+    logging.debug("[Begin] Caller -- Opening Callee -> Caller Pipe ")
     with open(inpipe) as i:
+        logging.debug("[Done] Caller -- Opening Callee -> Caller Pipe ")
     # wait for the process to finish
+        logging.debug("[Begin] waiting for sub process to finish")
         subpro.wait()
+        logging.debug("[Done] waiting for sub process to finish")
         line = i.readline()
         obj = json.loads(line)
         if obj["code"] == 500:
-            raise ValueError("Callee Internal Error")
+            raise ValueError("Callee Internal Error : " + obj["message"])
         elif obj["code"] == 200:
             return obj["return_val"]
         else:
@@ -118,4 +136,4 @@ def call(setting):
 
 
 def call_python3(filename, function_name, args):
-    call(python_call_setting("python3", filename, function_name, args))
+    return call(python_call_setting("python3", filename, function_name, args))

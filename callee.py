@@ -1,8 +1,7 @@
 
 import UniversalLanguageInterface as ULI
 
-def b(a:str):
-    return "Hello, World, {}!!".format(a)
+import function_ref
 
-ULI.export(b)
+ULI.export(function_ref.b)
 ULI.start()
