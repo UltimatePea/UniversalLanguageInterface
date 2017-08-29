@@ -71,7 +71,7 @@ def start():
     safe_start()
 
 
-class CallSettings:
+class CallSetting:
     def __init__(self, prog, filename, function_name, args):
         self.prog = prog
         self.filename = filename
@@ -91,7 +91,7 @@ def call(setting):
     os.mkfifo(outpipe) # TODO security hazard, handle OSError here
     os.mkfifo(inpipe)
     # write argument to `inp`
-    with open(outpipe) as o:
+    with open(outpipe, 'w') as o:
         o.writeline(json.dump({
             "name": setting.function_name,
             "args": setting.args
@@ -114,5 +114,5 @@ def call(setting):
 
 
 
-def call_python3(filename, function, args):
+def call_python3(filename, function_name, args):
     call(python_call_setting("python3", filename, function_name, args))
