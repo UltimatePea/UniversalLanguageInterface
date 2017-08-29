@@ -45,7 +45,7 @@ def return_val(output_pipe_name, dic):
     Open the output pipe and dump json represetation of dic as a line
     """
     with open(output_pipe_name) as f:
-        f.writeline(json.dumps(dic))
+        f.write(json.dumps(dic) + os.linesep)
 
 
 def safe_start():
@@ -90,16 +90,19 @@ def call(setting):
     inpipe = os.path.join(tempdir, "outp") # Callee to caller pipe
     os.mkfifo(outpipe) # TODO security hazard, handle OSError here
     os.mkfifo(inpipe)
-    # write argument to `inp`
+    # write argument to `inp`, Open will block until the other end also opens, so need subprocess call
+    subpro = subprocess.Popen([setting.prog, setting.filename, "--mode", "single", "--input-pipe", outpipe, "--output-pip", inpipe])
     with open(outpipe, 'w') as o:
-        o.writeline(json.dump({
+        o.write(json.dumps({
             "name": setting.function_name,
             "args": setting.args
-            }))
+            }) + os.linesep)
     # call program in single mode
-    subprocess.call([setting.prog, setting.filename, "--mode", "single", "--input-pipe", outpipe, "--output-pip", inpipe])
-    # program should put one line to inpipe
+    
+    # program should put one line to inpipe, we need to open pipe here in order to prevent the subprocess from blocking
     with open(inpipe) as i:
+    # wait for the process to finish
+        subpro.wait()
         line = i.readline()
         obj = json.loads(line)
         if obj["code"] == 500:
