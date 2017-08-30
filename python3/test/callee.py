@@ -1,7 +1,7 @@
 
 import UniversalLanguageInterface as ULI
 
-import function_ref
+import test_functions
 
-ULI.export(function_ref.b)
+ULI.export(test_functions.b)
 ULI.start()

@@ -1,3 +1,4 @@
 test:
-	python3 test_python.py
+	python3 python3/test_python.py
+	@echo Test Successful
 	
