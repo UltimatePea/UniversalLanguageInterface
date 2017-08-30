@@ -43,7 +43,7 @@ def start_single_mode(input_pipe_name, output_pipe_name):
         args = info["args"]
         if name not in export_list:
             raise ValueError("Function {} does not exist".format(name))
-        return_val(output_pipe_name, {"code":200, "return_val":export_list[name](*args)})
+        return_val(output_pipe_name, {"code":200, "return_val":export_list[name](args)})
     
 
     
