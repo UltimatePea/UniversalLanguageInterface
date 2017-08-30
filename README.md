@@ -10,9 +10,10 @@ It is designed to eliminate the underlying procedures of dealing with process cr
 
 ## Calling Matrix
 
-| Caller >> <br> Callee vv | Python |
-| ---                      | ---    |
-| Python                   | ✔      |
+| Caller >> <br> Callee vv | Python | Haskell |
+| ---                      | ---    | ---     |
+| Python                   | ✔      | ✘       |
+| Haskell                  | ✘      | ✘       |
 
 ## Complete Documentation
 
