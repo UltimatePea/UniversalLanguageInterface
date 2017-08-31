@@ -15,8 +15,13 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     UniversalLanguageInterface
   build-depends:       base >= 4.7 && < 5
+                       , aeson >= 1.1 && < 1.2
+                       , bytestring >= 0.10 && < 0.11
+                       , containers >= 0.5 && < 0.6
+                       , argparser >= 0.3 && < 0.4
+
   default-language:    Haskell2010
 
 test-suite UniversalLanguageInterface-test
