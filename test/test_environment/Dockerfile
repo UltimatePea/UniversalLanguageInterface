@@ -8,7 +8,7 @@ WORKDIR /testenv
 COPY . /testenv
 
 # Install any needed packages specified in requirements.txt
-# RUN pip install -r requirements.txt
+RUN apt-get install make
 
 # Run app.py when the container launches
 CMD ["make", "ptest"]
