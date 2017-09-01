@@ -3,7 +3,8 @@
 module UniversalLanguageInterface (
 
     exportAndStart',
-    exportAndStart
+    exportAndStart,
+    callInterpreter,
 
 ) where
 
@@ -13,6 +14,7 @@ import Data.ByteString (hGetLine, hPutStr)
 import Data.ByteString.Lazy (fromStrict, toStrict)
 import GHC.Generics
 import System.IO (openFile, hClose, IOMode(..))
+import System.Directory (removeFile)
 import Data.Aeson
 import qualified Data.Map as M
 
