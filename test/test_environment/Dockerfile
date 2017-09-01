@@ -1,14 +1,14 @@
-# Use an official Python runtime as a parent image
 FROM ubuntu
 
-# Set the working directory to /app
 WORKDIR /testenv
 
-# Copy the current directory contents into the container at /app
 COPY . /testenv
 
-# Install any needed packages specified in requirements.txt
-RUN apt-get install make
+RUN apt-get update
+RUN apt-get install -y build-essential
+RUN apt-get install -y python3
+RUN apt-get install -y python3-pip
 
-# Run app.py when the container launches
+CMD ["ls"]
+
 CMD ["make", "ptest"]

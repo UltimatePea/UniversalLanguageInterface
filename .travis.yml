@@ -1,4 +1,6 @@
 language: generic
 script: make test
 notifications:
-      email: false
+  email: false
+services:
+  - docker
