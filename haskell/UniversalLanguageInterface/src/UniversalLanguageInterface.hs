@@ -7,6 +7,7 @@ module UniversalLanguageInterface (
 
 ) where
 
+
 import System.Console.ArgParser
 import Data.ByteString (hGetLine, hPutStr)
 import Data.ByteString.Lazy (fromStrict, toStrict)
@@ -14,6 +15,12 @@ import GHC.Generics
 import System.IO (openFile, hClose, IOMode(..))
 import Data.Aeson
 import qualified Data.Map as M
+
+-- caller
+
+import System.IO.Temp (withSystemTempDirectory)
+import System.Posix.Files (createNamedPipe, unionFileModes, ownerReadMode, ownerWriteMode)
+import System.Process (waitForProcess, createProcess, proc)
 
 exportAndStart' :: [(String, String -> IO String)] -> IO ()
 exportAndStart' fs = exportAndStart $ M.fromList fs
@@ -40,7 +47,10 @@ data ErrorResult = ErrorResult {
 
 instance ToJSON NormalResult
 instance ToJSON ErrorResult
+instance FromJSON NormalResult
+instance FromJSON ErrorResult
 
+instance ToJSON InputFunctionCall
 instance FromJSON InputFunctionCall
     
 exportAndStart :: M.Map String (String -> IO String) -> IO ()
@@ -69,7 +79,35 @@ exportAndStart fs =
             hClose hout
     )
             
-        
+
+callInterpreter :: String -- interpreter name
+                -> String -- program file path
+                -> String -- function name
+                -> String -- argument
+                -> IO String -- result
+
+callInterpreter intname progfile funname arg = 
+    withSystemTempDirectory "haskellcallertemp" $ \tempDirPath -> do
+        let callerToCalleePipe = tempDirPath ++ "/inp"
+            calleeToCallerPipe = tempDirPath ++ "/outp"
+        createNamedPipe callerToCalleePipe (ownerReadMode `unionFileModes` ownerWriteMode)
+        createNamedPipe calleeToCallerPipe (ownerReadMode `unionFileModes` ownerWriteMode)
+        (_, _, _, h) <- createProcess (proc intname [progfile, "--mode", "single", "--input-pipe", callerToCalleePipe, "--output-pipe", calleeToCallerPipe])
+        hCallerToCallee <- openFile callerToCalleePipe WriteMode
+        hPutStr hCallerToCallee $ toStrict $ encode (InputFunctionCall funname arg)
+        hCalleeToCaller <- openFile calleeToCallerPipe ReadMode
+        -- hClose hCallerToCallee
+        waitForProcess h
+        line <- hGetLine hCallerToCallee
+
+        case decode (fromStrict line) of 
+            Nothing -> case decode (fromStrict line) of
+                            Nothing -> error "Unable to parse return"
+                            Just (ErrorResult _ message) -> error message
+            Just (NormalResult _ returnVal) ->  return returnVal
+
+
+    
         
 
     
