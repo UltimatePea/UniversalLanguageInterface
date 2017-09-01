@@ -129,6 +129,9 @@ def call(setting):
             return obj["return_val"]
         else:
             raise ValueError("Unable to understand response, no response code given")
+    # delete pipes
+    os.remove(inpipe)
+    os.remove(outpipe)
 
     
 

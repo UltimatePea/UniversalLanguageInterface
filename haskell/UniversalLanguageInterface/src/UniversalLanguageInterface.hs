@@ -99,12 +99,19 @@ callInterpreter intname progfile funname arg =
         -- hClose hCallerToCallee
         waitForProcess h
         line <- hGetLine hCallerToCallee
+         
+        -- clean up
+        hClose hCalleeToCaller
+        hClose hCallerToCallee
+        -- probably fine without this, temp directory will be deleted
+        removeFile callerToCalleePipe
+        removeFile calleeToCallerPipe
 
         case decode (fromStrict line) of 
             Nothing -> case decode (fromStrict line) of
                             Nothing -> error "Unable to parse return"
                             Just (ErrorResult _ message) -> error message
-            Just (NormalResult _ returnVal) ->  return returnVal
+            Just (NormalResult _ returnVal) -> return returnVal
 
 
     
