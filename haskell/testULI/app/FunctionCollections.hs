@@ -1,6 +1,6 @@
-module FunctionCallections where
+module FunctionCollections where
 
 testFunc :: String -> IO String
 testFunc str = do
-    putLine "[Haskell] Test Function"
+    putStrLn "[Haskell] Test Function"
     return $ str ++ "Callee :: Haskell"
