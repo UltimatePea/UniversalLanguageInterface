@@ -20,7 +20,7 @@ import qualified Data.Map as M
 
 -- caller
 
-import System.IO.Temp (withSystemTempDirectory)
+import System.IO.Temp (withSystemTempDirectory, createTempDirectory, getCanonicalTemporaryDirectory)
 import System.Posix.Files (createNamedPipe, unionFileModes, ownerReadMode, ownerWriteMode)
 import System.Process (waitForProcess, createProcess, proc)
 
@@ -63,8 +63,16 @@ exportAndStart fs =
             `andBy` reqFlag "input-pipe"
             `andBy` reqFlag "output-pipe"
     in withParseResult parser (\options -> do
-            hin <- openFile (inputPipe options) ReadMode
+
+            putStrLn "Callee :: Opening Callee to Caller Pipe"
             hout <- openFile (outputPipe options) WriteMode
+            putStrLn "Callee :: Done Opening Callee to Caller Pipe"
+
+            putStrLn "Callee :: Opening Caller to Callee Pipe"
+            hin <- openFile (inputPipe options) ReadMode
+            putStrLn "Callee :: Done Opening Caller to Callee Pipe"
+
+
             inputLine <- hGetLine hin 
             case decode (fromStrict inputLine) of 
                 Nothing -> error "Unable to parse input " -- TODO, throw 500 onto hout
@@ -88,26 +96,42 @@ callInterpreter :: String -- interpreter name
                 -> String -- argument
                 -> IO String -- result
 
-callInterpreter intname progfile funname arg = 
-    withSystemTempDirectory "haskellcallertemp" $ \tempDirPath -> do
+callInterpreter intname progfile funname arg =  do
+    -- withSystemTempDirectory "haskellcallertemp" $ \tempDirPath -> do
+    -- try not using lazy io
+    tempPath <- getCanonicalTemporaryDirectory
+    tempDirPath <- createTempDirectory tempPath "haskellcallertemp"
+    do
         let callerToCalleePipe = tempDirPath ++ "/inp"
             calleeToCallerPipe = tempDirPath ++ "/outp"
         createNamedPipe callerToCalleePipe (ownerReadMode `unionFileModes` ownerWriteMode)
         createNamedPipe calleeToCallerPipe (ownerReadMode `unionFileModes` ownerWriteMode)
         (_, _, _, h) <- createProcess (proc intname [progfile, "--mode", "single", "--input-pipe", callerToCalleePipe, "--output-pipe", calleeToCallerPipe])
-        hCallerToCallee <- openFile callerToCalleePipe WriteMode
-        hPutStr hCallerToCallee $ toStrict $ encode (InputFunctionCall funname arg)
+
+        putStrLn "Caller :: Opening Callee to Caller Pipe"
         hCalleeToCaller <- openFile calleeToCallerPipe ReadMode
+        putStrLn "Caller :: Done Opening Callee to Caller Pipe"
+
+        putStrLn "Caller :: Opening Caller to Callee Pipe"
+        hCallerToCallee <- openFile callerToCalleePipe WriteMode
+        putStrLn "Caller :: Done Opening Caller to Callee Pipe"
+
+        -- write one line to inp
+        hPutStr hCallerToCallee $ toStrict $ encode (InputFunctionCall funname arg)
+
+
         -- hClose hCallerToCallee
         waitForProcess h
         line <- hGetLine hCallerToCallee
          
         -- clean up
+        putStrLn "Caller Cleaning Up"
         hClose hCalleeToCaller
         hClose hCallerToCallee
+        putStrLn "Caller Done Cleaning Up"
         -- probably fine without this, temp directory will be deleted
-        removeFile callerToCalleePipe
-        removeFile calleeToCallerPipe
+        --removeFile callerToCalleePipe
+        --removeFile calleeToCallerPipe
 
         case decode (fromStrict line) of 
             Nothing -> case decode (fromStrict line) of
