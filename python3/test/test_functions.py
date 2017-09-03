@@ -1,2 +1,2 @@
-def b(a:str):
-    return "Hello, World, {}!!".format(a)
+def test_func(arg:str):
+    return "{}Callee :: python3".format(arg)

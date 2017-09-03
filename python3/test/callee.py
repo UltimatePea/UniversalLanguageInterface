@@ -4,5 +4,5 @@ import UniversalLanguageInterface as ULI
 import test_functions
 
 ULI.start({
-        "b": test_functions.b
+        "test_func": test_functions.test_func
     })
