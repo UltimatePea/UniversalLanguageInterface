@@ -8,20 +8,21 @@ logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 export_list = {}
 
-def export(f):
-    """
-    Expose to ULI a function to call
-
-    the name is to be the function's name
-    
-    Argument f: any function
-
-    """
-
-
-    if f.__name__ in export_list:
-        raise ValueError("Function name clashes at {}".format(f.__name__))
-    export_list[f.__name__] = f
+## Abstracted into start
+#def export(f):
+#    """
+#    Expose to ULI a function to call
+#
+#    the name is to be the function's name
+#    
+#    Argument f: any function
+#
+#    """
+#
+#
+#    if f.__name__ in export_list:
+#        raise ValueError("Function name clashes at {}".format(f.__name__))
+#    export_list[f.__name__] = f
 
 
 def start_single_mode(input_pipe_name, output_pipe_name):
@@ -77,21 +78,26 @@ def safe_start():
         start_stream_mode()
 
         
-def start():
+def start(functions):
+    """
+    Arguments: name and function dictionary
+
+    ULI.start({ "hello": hello,
+                "some_func_name": some_func,
+                });
+    """
+    global export_list
+    export_list = functions
     safe_start()
 
 
 class CallSetting:
-    def __init__(self, prog, filename, function_name, args):
+    def __init__(self, prog, arguments, function_name, args):
         self.prog = prog
-        self.filename = filename
+        self.arguments = arguments
         self.function_name = function_name
         self.args = args
         self.mode = "single"
-
-
-def python_call_setting(python_exec_name, filename, function_name, args):
-    return CallSetting(python_exec_name, filename, function_name, args)
 
 
 def call(setting):
@@ -102,7 +108,7 @@ def call(setting):
     os.mkfifo(inpipe)
     # write argument to `inp`, Open will block until the other end also opens, so need subprocess call
     logging.debug("[Begin] Forking off Sub process")
-    subpro = subprocess.Popen([setting.prog, setting.filename, "--mode", "single", "--input-pipe", outpipe, "--output-pip", inpipe])
+    subpro = subprocess.Popen([setting.prog] +  setting.arguments + ["--mode", "single", "--input-pipe", outpipe, "--output-pip", inpipe])
     logging.debug("[Done] Forking off Sub process")
     logging.debug("[Begin] Caller -- Opening Caller -> Callee Pipe ")
     with open(outpipe, 'w') as o:
@@ -138,5 +144,5 @@ def call(setting):
 
 
 
-def call_python3(filename, function_name, args):
-    return call(python_call_setting("python3", filename, function_name, args))
+def callSingle(interpreter_name, arguments, function_name, args):
+    return call(CallSetting(interpreter_name, arguments, function_name, args))

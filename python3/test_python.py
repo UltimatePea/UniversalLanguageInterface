@@ -4,7 +4,7 @@ import os, sys, subprocess
 # Change the directory to be this shell's execution directory
 os.chdir(sys.path[0])
 
-os.system('cp -r UniversalLanguageInterface test/')
+# TODO remove this
 os.chdir('test')
 
 output = subprocess.check_output(['python3', 'caller.py']).decode('utf-8')
