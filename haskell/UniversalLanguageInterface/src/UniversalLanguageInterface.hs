@@ -87,7 +87,7 @@ exportAndStart fs =
             
 
 callInterpreter :: String -- interpreter name
-                -> String -- program file path
+                -> [String] -- arguments, typically program file path, in case of compiled program, [] 
                 -> String -- function name
                 -> String -- argument
                 -> IO String -- result
@@ -98,7 +98,7 @@ callInterpreter intname progfile funname arg =
             calleeToCallerPipe = tempDirPath ++ "/outp"
         createNamedPipe callerToCalleePipe (ownerReadMode `unionFileModes` ownerWriteMode)
         createNamedPipe calleeToCallerPipe (ownerReadMode `unionFileModes` ownerWriteMode)
-        (_, _, _, h) <- createProcess (proc intname [progfile, "--mode", "single", "--input-pipe", callerToCalleePipe, "--output-pipe", calleeToCallerPipe])
+        (_, _, _, h) <- createProcess (proc intname $ progfile ++ ["--mode", "single", "--input-pipe", callerToCalleePipe, "--output-pipe", calleeToCallerPipe])
         hCallerToCallee <- openFd callerToCalleePipe WriteOnly Nothing flags
         fdWrite hCallerToCallee $ (unpack $ encode (InputFunctionCall funname arg)) ++ "\n"
         hCalleeToCaller <- openFile calleeToCallerPipe ReadMode
