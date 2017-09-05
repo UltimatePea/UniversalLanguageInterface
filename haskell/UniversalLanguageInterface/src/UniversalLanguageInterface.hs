@@ -6,7 +6,7 @@ module UniversalLanguageInterface (
 
     exportAndStart',
     exportAndStart,
-    callInterpreter,
+    callSingle,
 
 ) where
 
@@ -98,13 +98,13 @@ exportAndStart fs =
     )
             
 
-callInterpreter :: String -- interpreter name
+callSingle :: String -- interpreter name
                 -> [String] -- arguments, typically program file path, in case of compiled program, [] 
                 -> String -- function name
                 -> String -- argument
                 -> IO String -- result
 
-callInterpreter intname progfile funname arg = 
+callSingle intname progfile funname arg = 
     withSystemTempDirectory "haskellcallertemp" $ \tempDirPath -> do
         let callerToCalleePipe = tempDirPath ++ "/inp"
             calleeToCallerPipe = tempDirPath ++ "/outp"
