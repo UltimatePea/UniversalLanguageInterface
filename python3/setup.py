@@ -99,4 +99,5 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
     },
+	zip_safe=True,
 )
