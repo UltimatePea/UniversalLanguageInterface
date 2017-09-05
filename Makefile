@@ -4,7 +4,8 @@ test:
 	docker run testuliimage
 
 script_test:
-	python3 python3/test_python.py
+	cd test/integrationTestULI; stack install
+	integrationTestULI-exe
 	@echo Test Successful
 
 

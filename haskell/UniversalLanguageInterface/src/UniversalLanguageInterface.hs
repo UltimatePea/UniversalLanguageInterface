@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ExtendedDefaultRules #-}
 
 module UniversalLanguageInterface (
 
@@ -49,10 +51,20 @@ data ErrorResult = ErrorResult {
     message :: String
 } deriving (Show, Generic)
 
-instance ToJSON NormalResult
-instance ToJSON ErrorResult
-instance FromJSON NormalResult
-instance FromJSON ErrorResult
+instance ToJSON NormalResult where
+    toJSON r = object ["code" .= ncode r, "return_val" .= return_val r]
+instance ToJSON ErrorResult where
+    toJSON r = object ["code" .= ecode r, "return_val" .= message r]
+
+instance FromJSON NormalResult where
+    parseJSON = withObject "NormalResult" $ \v -> NormalResult
+        <$> v .: "code"
+        <*> v .: "return_val"
+
+instance FromJSON ErrorResult where
+    parseJSON = withObject "ErrorResult" $ \v -> ErrorResult
+        <$> v .: "code"
+        <*> v .: "message"
 
 instance ToJSON InputFunctionCall
 instance FromJSON InputFunctionCall
@@ -115,7 +127,7 @@ callInterpreter intname progfile funname arg =
 
         case decode (fromStrict line) of 
             Nothing -> case decode (fromStrict line) of
-                            Nothing -> error "Unable to parse return"
+                            Nothing -> error $ "Unable to parse return " ++ "return is " ++ unpack (fromStrict line)
                             Just (ErrorResult _ message) -> error message
             Just (NormalResult _ returnVal) -> return returnVal
 
