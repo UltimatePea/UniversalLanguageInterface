@@ -17,8 +17,13 @@ buildAndInstallPackages :: IO ()
 buildAndInstallPackages = do
     curDir <- getCurrentDirectory
     -- note, individual actions must also restore the working directory
+    putStrLn "Building python3"
     build (\x -> x </> "python3") curDir "python3 setup.py install"
+    putStrLn "Building Haskell"
     build (\x -> x </> "haskell" </> "UniversalLanguageInterface") curDir "cabal install"
+    putStrLn "Building NodeJs"
+    build (\x -> x </> "nodejs") curDir "npm install -g"
+    putStrLn "Done Building"
     setCurrentDirectory curDir
     
 
@@ -47,6 +52,9 @@ test = do
     -- python3
     execAssertEqual "python3 T_python3_call_python3.py" "Caller :: python3 -- Callee :: python3\n"
     execAssertEqual "python3 T_python3_call_haskell.py" "Caller :: python3 -- Callee :: Haskell\n"
+    -- node
+    exec "npm link universal-language-interface" -- npm must use local imports, so we need to install this package here
+
     setCurrentDirectory curDir
 
 execAssertEqual :: String -- command
