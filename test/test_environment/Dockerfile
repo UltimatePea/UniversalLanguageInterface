@@ -13,6 +13,7 @@ RUN apt-get install -y curl
 RUN curl -sSL https://get.haskellstack.org/ | sh
 ENV PATH="/root/.local/bin:${PATH}"
 RUN stack setup
+RUN cabal update
 
 CMD ["ls"]
 
