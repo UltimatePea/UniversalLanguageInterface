@@ -1,0 +1,15 @@
+{
+  "name": "universal-language-interface",
+  "version": "1.0.0",
+  "description": "Universal Language Interface package for NodeJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Language",
+    "Interface"
+  ],
+  "author": "UltimatePea",
+  "license": "BSD-2-Clause"
+}
