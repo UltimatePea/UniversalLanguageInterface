@@ -1,5 +1,8 @@
 language: generic
-script: make test
+env:
+  - TARGET=script_test
+  - TARGET=test
+script: "make $TARGET"
 notifications:
   email: false
 services:
