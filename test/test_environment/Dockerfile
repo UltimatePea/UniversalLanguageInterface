@@ -8,7 +8,8 @@ RUN apt-get install -y \
 	python3-pip \
 	haskell-platform \
 	curl \
-	nodejs
+	nodejs \
+	npm
 RUN curl -sSL https://get.haskellstack.org/ | sh
 ENV PATH="/root/.local/bin:${PATH}"
 RUN stack setup
