@@ -1,7 +1,6 @@
 language: generic
 env:
   - TARGET=test
-  - TARGET=travis_test
 script: "make $TARGET"
 notifications:
   email: false

@@ -8,9 +8,9 @@ script_test:
 	integrationTestULI-exe
 	@echo Test Successful
 
-travis_test:
-	export PATH="/root/.local/bin:${PATH}"
-	curl -sSL https://get.haskellstack.org/ | sh
-	stack setup
-	cabal update
-	make script_test
+#travis_test:
+#	export PATH="/root/.local/bin:${PATH}"
+#	curl -sSL https://get.haskellstack.org/ | sh
+#	stack setup
+#	cabal update
+#	make script_test
