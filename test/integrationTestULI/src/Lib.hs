@@ -21,7 +21,7 @@ buildAndInstallPackages = do
     build (\x -> x </> "python3") curDir "python3 setup.py install"
     putStrLn "Building Haskell"
     build (\x -> x </> "haskell" </> "UniversalLanguageInterface") curDir "cabal install"
-    putStrLn "Building NodeJs"
+    putStrLn "Building nodejs"
     build (\x -> x </> "nodejs") curDir "npm install -g"
     putStrLn "Done Building"
     setCurrentDirectory curDir
@@ -54,6 +54,8 @@ test = do
     execAssertEqual "python3 T_python3_call_haskell.py" "Caller :: python3 -- Callee :: Haskell\n"
     -- node
     exec "npm link universal-language-interface" -- npm must use local imports, so we need to install this package here
+    execAssertEqual "runhaskell THaskellCallNodejs.hs" "Caller :: Haskell -- Callee :: nodejs\n"
+    execAssertEqual "python3 T_python3_call_nodejs.py" "Caller :: python3 -- Callee :: nodejs\n"
 
     setCurrentDirectory curDir
 
@@ -61,6 +63,7 @@ execAssertEqual :: String -- command
                  -> String -- assertion 
                  -> IO () -- error on not equal
 execAssertEqual cmd str = do
+    putStrLn cmd
     ret <- exec cmd
     assert str ret
 

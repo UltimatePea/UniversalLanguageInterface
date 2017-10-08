@@ -11,5 +11,9 @@
     "Interface"
   ],
   "author": "UltimatePea",
-  "license": "BSD-2-Clause"
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "argparse": "^1.0.9",
+    "fifo-js": "^2.1.0"
+  }
 }
