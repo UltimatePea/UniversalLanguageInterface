@@ -5,8 +5,9 @@ It is designed to eliminate the underlying procedures of dealing with process cr
 
 ## Supported Languages
 
-- Python (Planned)
-- Haskell (Planned)
+- Python (Minimum Done)
+- Haskell (Minimum Done)
+- Nodejs (Blocked by a bug, waiting for time to debug)
 
 ## Calling Matrix
 
