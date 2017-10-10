@@ -54,6 +54,7 @@ test = do
     execAssertEqual "python3 T_python3_call_haskell.py" "Caller :: python3 -- Callee :: Haskell\n"
     -- node
     exec "npm link universal-language-interface" -- npm must use local imports, so we need to install this package here
+    execAssertEqual "node --use-strict T_nodejs_call_nodejs.js" "Caller :: nodejs -- Callee :: nodejs\n"
     execAssertEqual "runhaskell THaskellCallNodejs.hs" "Caller :: Haskell -- Callee :: nodejs\n"
     execAssertEqual "python3 T_python3_call_nodejs.py" "Caller :: python3 -- Callee :: nodejs\n"
 
